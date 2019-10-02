@@ -1,4 +1,4 @@
-export default class Asteroid extends Phaser.Physics.Arcade.Sprite {
+export default class MiniAsteroid extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y, tipo) {
     super(scene, x, y, "asteroid");
 
@@ -17,16 +17,15 @@ export default class Asteroid extends Phaser.Physics.Arcade.Sprite {
 
   fire(shipX, shipY) {
     this.setSize(32, 29);
+    this.setScale(0.4, 0.4);
     this.orbiting = true;
 
     this.setActive(true);
     this.setVisible(true);
 
-    let xOrigin = Phaser.Math.RND.between(0, 800);
+    let xOrigin = this.x - 20;
 
-    const rnd = Math.floor(Math.random() * (10 - 1)) + 1;
-
-    let yOrigin = rnd > 5 ? 0 : 600;
+    let yOrigin = this.y;
 
     this.setPosition(xOrigin, yOrigin);
 

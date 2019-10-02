@@ -1,5 +1,5 @@
 export default class QuickAsteroid extends Phaser.Physics.Arcade.Sprite {
-  constructor(scene, x, y) {
+  constructor(scene, x, y, tipo) {
     super(scene, x, y, "quickAsteroid");
 
     this.speed = Phaser.Math.GetSpeed(200, 1);
@@ -8,6 +8,7 @@ export default class QuickAsteroid extends Phaser.Physics.Arcade.Sprite {
     this.orbiting = false;
     this.direction = 0;
     this.factor = 1;
+    this.tipo = tipo;
   }
 
   isOrbiting() {

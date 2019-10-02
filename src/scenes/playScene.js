@@ -1,6 +1,7 @@
 import Shoot from "./../gameObjects/shoot";
 import Asteroid from "../gameObjects/asteroid.js";
 import QuickAsteroid from "../gameObjects/quickAsteroid.js";
+import MiniAsteroid from "../gameObjects/MiniAsteroid.js";
 
 export default class PlayScene extends Phaser.Scene {
   constructor() {
@@ -10,6 +11,12 @@ export default class PlayScene extends Phaser.Scene {
     this.gameOver = false;
     this.score = 0;
     this.scoreText;
+    this.livesCount = 3;
+    this.arrayLives = [];
+    this.shooted;
+    this.shotedExplosion;
+    this.hitshipSound;
+    this.deathSound;
   }
 
   preload() {}
@@ -19,6 +26,11 @@ export default class PlayScene extends Phaser.Scene {
     this.add.image(640, 0, "background");
     this.add.image(0, 480, "background");
     this.add.image(640, 480, "background");
+
+    this.shoted = this.sound.add("shootSound");
+    this.shotedExplosion = this.sound.add("shootDestroySound");
+    this.hitshipSound = this.sound.add("hitshipSound");
+    this.deathSound = this.sound.add("deathSound");
 
     this.scoreText = this.add.text(50, 10, "Score : 0", {
       font: "30px Arial",
@@ -31,10 +43,11 @@ export default class PlayScene extends Phaser.Scene {
       fill: "#fff"
     });
 
-    for (var i = 0; i < 3; i++) {
+    for (var i = 0; i < this.livesCount; i++) {
       var ship = this.lives.create(640 + 60 * i, 30, "ship");
       ship.angle = 90;
       ship.alpha = 0.4;
+      this.arrayLives.push(ship);
     }
 
     this.ship = this.physics.add.image(400, 300, "ship");
@@ -99,7 +112,7 @@ export default class PlayScene extends Phaser.Scene {
 
       if (shoot) {
         shoot.fire(this.ship.x, this.ship.y, this.ship.rotation);
-
+        this.shoted.play();
         this.lastFired = time + 50;
       }
     }
@@ -131,23 +144,52 @@ export default class PlayScene extends Phaser.Scene {
     let asteroid =
       rnd > 5
         ? new Asteroid(this, 200, 300, 0)
-        : new QuickAsteroid(this, 200, 300, 0);
+        : new QuickAsteroid(this, 200, 300, 1);
     this.asteroidsGroup.add(asteroid, true);
     this.asteroidsArray.push(asteroid);
   }
 
   hitShip(ship, asteroid) {
-    this.physics.pause();
-    this.asteroidsTimedEvent.paused = true;
+    asteroid.disableBody(true, true);
+    this.arrayLives[this.livesCount - 1].visible = false;
+    this.livesCount--;
+    this.hitshipSound.play();
 
-    this.ship.setTint(0xff0000);
-    this.ship.body.allowRotation = false;
+    if (this.livesCount == 0) {
+      this.physics.pause();
+      this.asteroidsTimedEvent.paused = true;
 
-    this.gameOver = true;
+      this.ship.setTint(0xff0000);
+      this.ship.body.allowRotation = false;
+
+      this.gameOver = true;
+      this.deathSound.play();
+    }
   }
 
   hitShoot(shoot, asteroid) {
     this.score += 10;
+    this.shotedExplosion.play();
+    asteroid.disableBody(true, true);
+    if (asteroid.tipo > -1) {
+      let miniAsteroid = new MiniAsteroid(
+        this,
+        asteroid.x - 20,
+        asteroid.y,
+        -1
+      );
+      this.asteroidsGroup.add(miniAsteroid, true);
+      this.asteroidsArray.push(miniAsteroid);
+
+      miniAsteroid = new MiniAsteroid(this, asteroid.x + 20, asteroid.y, -1);
+      this.asteroidsGroup.add(miniAsteroid, true);
+      this.asteroidsArray.push(miniAsteroid);
+
+      miniAsteroid = new MiniAsteroid(this, asteroid.x + 40, asteroid.y, -1);
+      this.asteroidsGroup.add(miniAsteroid, true);
+      this.asteroidsArray.push(miniAsteroid);
+    }
+
     if (this.score == 50) {
       this.asteroidsTimedEvent = this.time.addEvent({
         delay: 2000,
@@ -165,6 +207,5 @@ export default class PlayScene extends Phaser.Scene {
       });
     }
     this.scoreText.setText("Score: " + this.score);
-    asteroid.disableBody(true, true);
   }
 }
