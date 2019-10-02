@@ -1,8 +1,8 @@
-export default class Asteroid extends Phaser.Physics.Arcade.Sprite {
+export default class QuickAsteroid extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y) {
-    super(scene, x, y, "asteroid");
+    super(scene, x, y, "quickAsteroid");
 
-    this.speed = Phaser.Math.GetSpeed(100, 1);
+    this.speed = Phaser.Math.GetSpeed(200, 1);
     this.direction = 0;
     this.angle = 0;
     this.orbiting = false;

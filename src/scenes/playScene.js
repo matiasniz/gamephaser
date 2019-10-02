@@ -1,31 +1,41 @@
-import asteroid from "./../assets/img/asteroid.png";
-import background from "./../assets/img/background.png";
-import ship from "./../assets/img/ship.png";
-import shoot from "./../assets/img/shoot.png";
-
 import Shoot from "./../gameObjects/shoot";
 import Asteroid from "../gameObjects/asteroid.js";
+import QuickAsteroid from "../gameObjects/quickAsteroid.js";
 
 export default class PlayScene extends Phaser.Scene {
   constructor() {
-    super({ key: "PlayScene", active: true });
+    super({ key: "PlayScene" });
     this.lastFired = 0;
     this.asteroidElapsedTime = 3000;
     this.gameOver = false;
+    this.score = 0;
+    this.scoreText;
   }
 
-  preload() {
-    this.load.image("background", background);
-    this.load.image("ship", ship);
-    this.load.image("asteroid", asteroid);
-    this.load.image("shoot", shoot);
-  }
+  preload() {}
 
   create() {
     this.add.image(0, 0, "background");
     this.add.image(640, 0, "background");
     this.add.image(0, 480, "background");
     this.add.image(640, 480, "background");
+
+    this.scoreText = this.add.text(50, 10, "Score : 0", {
+      font: "30px Arial",
+      fill: "#fff"
+    });
+
+    this.lives = this.add.group();
+    this.add.text(500, 10, "Lives : ", {
+      font: "30px Arial",
+      fill: "#fff"
+    });
+
+    for (var i = 0; i < 3; i++) {
+      var ship = this.lives.create(640 + 60 * i, 30, "ship");
+      ship.angle = 90;
+      ship.alpha = 0.4;
+    }
 
     this.ship = this.physics.add.image(400, 300, "ship");
     this.ship.setDamping(true);
@@ -116,7 +126,12 @@ export default class PlayScene extends Phaser.Scene {
   }
 
   addAsteroid() {
-    let asteroid = new Asteroid(this, 200, 300, "asteroid", 0);
+    const rnd = Math.floor(Math.random() * (10 - 1)) + 1;
+
+    let asteroid =
+      rnd > 5
+        ? new Asteroid(this, 200, 300, 0)
+        : new QuickAsteroid(this, 200, 300, 0);
     this.asteroidsGroup.add(asteroid, true);
     this.asteroidsArray.push(asteroid);
   }
@@ -132,6 +147,24 @@ export default class PlayScene extends Phaser.Scene {
   }
 
   hitShoot(shoot, asteroid) {
+    this.score += 10;
+    if (this.score == 50) {
+      this.asteroidsTimedEvent = this.time.addEvent({
+        delay: 2000,
+        callback: this.addAsteroid,
+        callbackScope: this,
+        loop: true
+      });
+    }
+    if (this.score == 100) {
+      this.asteroidsTimedEvent = this.time.addEvent({
+        delay: 1000,
+        callback: this.addAsteroid,
+        callbackScope: this,
+        loop: true
+      });
+    }
+    this.scoreText.setText("Score: " + this.score);
     asteroid.disableBody(true, true);
   }
 }

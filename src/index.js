@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import "./assets/css/style.css";
 
 import PlayScene from "./scenes/playScene";
+import Boot from "./scenes/Boot";
 
 const config = {
   width: 800, //1024
@@ -14,7 +15,7 @@ const config = {
       gravity: { y: 0 }
     }
   },
-  scene: [PlayScene]
+  scene: [Boot, PlayScene]
 };
 
 const game = new Phaser.Game(config);
